@@ -1,0 +1,13 @@
+@import url('https://fonts.googleapis.com/css2?family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&family=Work+Sans:ital,wght@0,100..900;1,100..900&display=swap');
+
+:root {
+ 
+  --bg-main: #FAF3DD;        
+  --bg-secondary: #C6D5B9;  
+  --accent-soft: #8FC9A9;    
+  --accent-medium: #68B0AB;  
+  --text-dark: #696D7D;   
+
+  --font-heading: 'Google Sans', sans-serif;
+  --font-body: 'Work Sans', sans-serif;
+}
