@@ -1,13 +1,40 @@
-@import url('https://fonts.googleapis.com/css2?family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&family=Work+Sans:ital,wght@0,100..900;1,100..900&display=swap');
-
+/* ==========================================
+   VARIABLES Y PALETA DE COLORES
+   ========================================== */
 :root {
- 
-  --bg-main: #FAF3DD;        
-  --bg-secondary: #C6D5B9;  
-  --accent-soft: #8FC9A9;    
-  --accent-medium: #68B0AB;  
-  --text-dark: #696D7D;   
+  --color-fondo-principal: #FAF3DD;
+  --color-fondo-secundario: #C6D5B9;
+  --color-acento-suave: #8FC9A9;
+  --color-acento-medio: #68B0AB;
+  --color-texto-oscuro: #696D7D;
+  --fuente-titulos: 'Google Sans', sans-serif;
+  --fuente-cuerpo: 'Work Sans', sans-serif;
+}
 
-  --font-heading: 'Google Sans', sans-serif;
-  --font-body: 'Work Sans', sans-serif;
+body {
+  background-color: var(--color-fondo-principal);
+  color: var(--color-texto-oscuro);
+  font-family: var(--fuente-cuerpo);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--fuente-titulos);
+  font-weight: 700;
+  color: var(--color-texto-oscuro);
+}
+
+.tarjeta-fondo-personalizado {
+  background-color: var(--color-fondo-secundario);
+  border-color: var(--color-acento-medio);
+}
+
+.btn-boton-personalizado {
+  background-color: var(--color-acento-medio);
+  color: #ffffff;
+  border: none;
+}
+
+.btn-boton-personalizado:hover {
+  background-color: var(--color-acento-suave);
+  color: var(--color-texto-oscuro);
 }
