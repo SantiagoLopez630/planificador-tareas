@@ -1,6 +1,7 @@
-// Tareas iniciales de ejemplo por defecto
+// ejemplo de atreas
 const tareasPorDefecto = [
   {
+    id: "1",
     nombre: "Implementar Wireframe en Figma",
     descripcion: "Crear la maqueta con la distribución del dashboard y la paleta de colores pastel.",
     categoria: "Desarrollo",
@@ -8,32 +9,12 @@ const tareasPorDefecto = [
     fecha: "2026-11-05"
   },
   {
+    id: "2",
     nombre: "Estudiar Fundamentos de Spring Boot",
     descripcion: "Revisar la configuración de controladores, servicios y conexión a bases de datos SQL.",
     categoria: "Estudio",
     prioridad: "Alta",
     fecha: "2026-11-08"
-  },
-  {
-    nombre: "Organizar Tablero de Trello",
-    descripcion: "Actualizar las columnas del Backlog, Por hacer, En proceso y Finalizado para el Sprint 1.",
-    categoria: "Personal",
-    prioridad: "Media",
-    fecha: "2026-11-10"
-  },
-  {
-    nombre: "Optimizar Estilos CSS con Variables",
-    descripcion: "Asegurar que todas las clases usen la paleta de colores y la tipografía de Google Fonts.",
-    categoria: "Desarrollo",
-    prioridad: "Alta",
-    fecha: "2026-11-12"
-  },
-  {
-    nombre: "Rutina de Ejercicio en Smart Fit",
-    descripcion: "Completar sesión de entrenamiento de fuerza y cardio por la tarde.",
-    categoria: "Personal",
-    prioridad: "Baja",
-    fecha: "2026-11-15"
   }
 ];
 
@@ -51,12 +32,106 @@ function obtenerTareas() {
 }
 
 /**
- * Renderiza todas las tarjetas de tareas en el DOM.
+ * Valida los datos ingresados en el formulario antes de procesarlos.
+ * @param {Object} datos - Objeto con los valores del formulario
+ * @returns {boolean} - Retorna true si es válido, false si hay errores
  */
+function validFormFieldInput(datos) {
+  if (!datos.nombre || datos.nombre.trim() === "") {
+    Swal.fire({
+      icon: 'warning',
+      title: 'Campo incompleto',
+      text: 'El nombre de la tarea no puede estar vacío.',
+      confirmButtonColor: '#68B0AB'
+    });
+    return false;
+  }
+
+  if (!datos.descripcion || datos.descripcion.trim() === "") {
+    Swal.fire({
+      icon: 'warning',
+      title: 'Campo incompleto',
+      text: 'La descripción de la tarea no puede estar vacía.',
+      confirmButtonColor: '#68B0AB'
+    });
+    return false;
+  }
+
+  if (!datos.categoria) {
+    Swal.fire({
+      icon: 'warning',
+      title: 'Selección requerida',
+      text: 'Debe seleccionar una categoría para la tarea.',
+      confirmButtonColor: '#68B0AB'
+    });
+    return false;
+  }
+
+  if (!datos.prioridad) {
+    Swal.fire({
+      icon: 'warning',
+      title: 'Selección requerida',
+      text: 'Debe seleccionar un nivel de prioridad.',
+      confirmButtonColor: '#68B0AB'
+    });
+    return false;
+  }
+
+  if (!datos.fecha) {
+    Swal.fire({
+      icon: 'warning',
+      title: 'Fecha requerida',
+      text: 'Debe ingresar una fecha límite válida.',
+      confirmButtonColor: '#68B0AB'
+    });
+    return false;
+  }
+
+  return true;
+}
+
+/**
+ * Elimina una tarea según su ID y actualiza el almacenamiento y la vista.
+ * @param {string} idTarea - ID único de la tarea a eliminar
+ */
+function eliminarTarea(idTarea) {
+  Swal.fire({
+    title: '¿Estás seguro?',
+    text: "La tarea se eliminará permanentemente.",
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonColor: '#d33',
+    cancelButtonColor: '#68B0AB',
+    confirmButtonText: 'Sí, eliminar',
+    cancelButtonText: 'Cancelar'
+  }).then((resultado) => {
+    if (resultado.isConfirmed) {
+      let tareas = obtenerTareas();
+      tareas = tareas.filter(tarea => tarea.id !== idTarea);
+      localStorage.setItem('lista_tareas', JSON.stringify(tareas));
+      renderizarTareas();
+      
+      Swal.fire({
+        icon: 'success',
+        title: '¡Eliminada!',
+        text: 'La tarea ha sido borrada con éxito.',
+        timer: 1500,
+        showConfirmButton: false
+      });
+    }
+  });
+}
+
+//Renderiza todas las tarjetas de tareas en el DOM.
 function renderizarTareas() {
   const contenedor = document.getElementById('contenedor-lista-tareas');
   contenedor.innerHTML = '';
   const tareas = obtenerTareas();
+
+  if (tareas.length === 0) {
+    contenedor.innerHTML = '<p class="text-center text-muted my-3">No hay tareas pendientes en este momento.</p>';
+    return;
+  }
 
   tareas.forEach(tarea => {
     let claseBorde = 'border-secondary';
@@ -91,7 +166,10 @@ function renderizarTareas() {
         <p class="card-text text-muted small mb-2">${tarea.descripcion}</p>
         <div class="d-flex justify-content-between align-items-center">
           <small class="fw-bold">Vence: ${tarea.fecha}</small>
-          <span class="badge bg-secondary">Estado: Pendiente</span>
+          <div>
+            <span class="badge bg-secondary me-2">Pendiente</span>
+            <button class="btn btn-outline-danger btn-sm" onclick="eliminarTarea('${tarea.id}')">Eliminar</button>
+          </div>
         </div>
       </div>
     `;
@@ -99,13 +177,12 @@ function renderizarTareas() {
   });
 }
 
-/**
- * Maneja el evento de envío del formulario para agregar una nueva tarea.
- */
+// Maneja el evento de envío del formulario para agregar una nueva tarea.
 document.getElementById('formulario-tarea').addEventListener('submit', function(evento) {
   evento.preventDefault();
 
   const nuevaTarea = {
+    id: Date.now().toString(), // Genera un ID único basado en el tiempo
     nombre: document.getElementById('campo-nombre').value,
     descripcion: document.getElementById('campo-descripcion').value,
     categoria: document.getElementById('selector-categoria').value,
@@ -113,12 +190,26 @@ document.getElementById('formulario-tarea').addEventListener('submit', function(
     fecha: document.getElementById('campo-fecha').value
   };
 
+  // Validar datos utilizando la función exigida por la guía
+  if (!validFormFieldInput(nuevaTarea)) {
+    return; // Detiene la ejecución si la validación falla
+  }
+
   const tareas = obtenerTareas();
   tareas.unshift(nuevaTarea); // Inserta la nueva tarea al principio de la lista
   localStorage.setItem('lista_tareas', JSON.stringify(tareas));
 
   renderizarTareas();
   this.reset();
+
+  // Alerta de éxito con SweetAlert
+  Swal.fire({
+    icon: 'success',
+    title: '¡Tarea registrada!',
+    text: 'La nueva tarea se ha guardado correctamente.',
+    timer: 1800,
+    showConfirmButton: false
+  });
 });
 
 // Inicializar la aplicación al cargar el documento
