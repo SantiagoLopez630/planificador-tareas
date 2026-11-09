@@ -19,7 +19,7 @@ const tareasPorDefecto = [
 ];
 
 /**
- * Obtiene las tareas almacenadas en el navegador o carga las por defecto.
+ * Obtiene las tareas almacenadas en el navegador o carga las por defecto
  * @returns {Array} Lista de tareas
  */
 function obtenerTareas() {
@@ -32,9 +32,9 @@ function obtenerTareas() {
 }
 
 /**
- * Valida los datos ingresados en el formulario antes de procesarlos.
- * @param {Object} datos - Objeto con los valores del formulario
- * @returns {boolean} - Retorna true si es válido, false si hay errores
+ * Valida los datos ingresados en el formulario antes de procesarlos
+ * @param {Object} datos  Objeto con los valores del formulario
+ * @returns {boolean} Retorna true si es válido, false si hay errores 
  */
 function validFormFieldInput(datos) {
   if (!datos.nombre || datos.nombre.trim() === "") {
@@ -91,8 +91,8 @@ function validFormFieldInput(datos) {
 }
 
 /**
- * Elimina una tarea según su ID y actualiza el almacenamiento y la vista.
- * @param {string} idTarea - ID único de la tarea a eliminar
+ * Elimina una tarea según su ID y actualiza el almacenamiento y la vista
+ * @param {string} idTarea ID unico de la tarea a eliminar
  */
 function eliminarTarea(idTarea) {
   Swal.fire({
@@ -122,7 +122,7 @@ function eliminarTarea(idTarea) {
   });
 }
 
-//Renderiza todas las tarjetas de tareas en el DOM.
+//Renderiza todas las tarjetas de tareas en el DOM en el espacio del otro comentario del html
 function renderizarTareas() {
   const contenedor = document.getElementById('contenedor-lista-tareas');
   contenedor.innerHTML = '';
@@ -177,12 +177,12 @@ function renderizarTareas() {
   });
 }
 
-// Maneja el evento de envío del formulario para agregar una nueva tarea.
+// Maneja el evento de envío del formulario para agregar una nueva tarea
 document.getElementById('formulario-tarea').addEventListener('submit', function(evento) {
   evento.preventDefault();
 
   const nuevaTarea = {
-    id: Date.now().toString(), // Genera un ID único basado en el tiempo
+    id: Date.now().toString(), // Genera un ID unico basado en el tiempo
     nombre: document.getElementById('campo-nombre').value,
     descripcion: document.getElementById('campo-descripcion').value,
     categoria: document.getElementById('selector-categoria').value,
@@ -190,19 +190,19 @@ document.getElementById('formulario-tarea').addEventListener('submit', function(
     fecha: document.getElementById('campo-fecha').value
   };
 
-  // Validar datos utilizando la función exigida por la guía
+  // Validar datos utilizando la función exigida por la guia
   if (!validFormFieldInput(nuevaTarea)) {
     return; // Detiene la ejecución si la validación falla
   }
 
   const tareas = obtenerTareas();
-  tareas.unshift(nuevaTarea); // Inserta la nueva tarea al principio de la lista
+  tareas.unshift(nuevaTarea); // Inserta la nueva tarea al principio de la lista para eso el metodo unshift
   localStorage.setItem('lista_tareas', JSON.stringify(tareas));
 
   renderizarTareas();
   this.reset();
 
-  // Alerta de éxito con SweetAlert
+  // Alerta de success con SweetAlert
   Swal.fire({
     icon: 'success',
     title: '¡Tarea registrada!',
@@ -212,5 +212,5 @@ document.getElementById('formulario-tarea').addEventListener('submit', function(
   });
 });
 
-// Inicializar la aplicación al cargar el documento
+// Inicializar la aplicacion al cargar el documento por eso se pone en el body y no el head
 document.addEventListener('DOMContentLoaded', renderizarTareas);
