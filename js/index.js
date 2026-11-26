@@ -1,47 +1,11 @@
-// ejemplo de atreas
-const tareasPorDefecto = [
-  {
-    id: "1",
-    nombre: "Implementar Wireframe en Figma",
-    descripcion: "Crear la maqueta con la distribución del dashboard y la paleta de colores pastel.",
-    categoria: "Desarrollo",
-    prioridad: "Crítica",
-    fecha: "2026-11-05"
-  },
-  {
-    id: "2",
-    nombre: "Estudiar Fundamentos de Spring Boot",
-    descripcion: "Revisar la configuración de controladores, servicios y conexión a bases de datos SQL.",
-    categoria: "Estudio",
-    prioridad: "Alta",
-    fecha: "2026-11-08"
-  }
-];
+const taskManager = new TaskManager();
 
-/**
- * Obtiene las tareas almacenadas en el navegador o carga las por defecto
- * @returns {Array} Lista de tareas
- */
-function obtenerTareas() {
-  const tareasAlmacenadas = localStorage.getItem('lista_tareas');
-  if (!tareasAlmacenadas) {
-    localStorage.setItem('lista_tareas', JSON.stringify(tareasPorDefecto));
-    return tareasPorDefecto;
-  }
-  return JSON.parse(tareasAlmacenadas);
-}
-
-/**
- * Valida los datos ingresados en el formulario antes de procesarlos
- * @param {Object} datos  Objeto con los valores del formulario
- * @returns {boolean} Retorna true si es válido, false si hay errores 
- */
 function validFormFieldInput(datos) {
   if (!datos.nombre || datos.nombre.trim() === "") {
     Swal.fire({
       icon: 'warning',
       title: 'Campo incompleto',
-      text: 'El nombre de la tarea no puede estar vacío.',
+      text: 'El nombre de la tarea no puede estar vacío',
       confirmButtonColor: '#68B0AB'
     });
     return false;
@@ -51,7 +15,7 @@ function validFormFieldInput(datos) {
     Swal.fire({
       icon: 'warning',
       title: 'Campo incompleto',
-      text: 'La descripción de la tarea no puede estar vacía.',
+      text: 'La descripción de la tarea no puede estar vacía',
       confirmButtonColor: '#68B0AB'
     });
     return false;
@@ -61,7 +25,7 @@ function validFormFieldInput(datos) {
     Swal.fire({
       icon: 'warning',
       title: 'Selección requerida',
-      text: 'Debe seleccionar una categoría para la tarea.',
+      text: 'Debe seleccionar una categoría para la tarea',
       confirmButtonColor: '#68B0AB'
     });
     return false;
@@ -71,7 +35,7 @@ function validFormFieldInput(datos) {
     Swal.fire({
       icon: 'warning',
       title: 'Selección requerida',
-      text: 'Debe seleccionar un nivel de prioridad.',
+      text: 'Debe seleccionar un nivel de prioridad',
       confirmButtonColor: '#68B0AB'
     });
     return false;
@@ -81,7 +45,7 @@ function validFormFieldInput(datos) {
     Swal.fire({
       icon: 'warning',
       title: 'Fecha requerida',
-      text: 'Debe ingresar una fecha límite válida.',
+      text: 'Debe ingresar una fecha límite válida',
       confirmButtonColor: '#68B0AB'
     });
     return false;
@@ -90,43 +54,68 @@ function validFormFieldInput(datos) {
   return true;
 }
 
-/**
- * Elimina una tarea según su ID y actualiza el almacenamiento y la vista
- * @param {string} idTarea ID unico de la tarea a eliminar
- */
-function eliminarTarea(idTarea) {
-  Swal.fire({
-    title: '¿Estás seguro?',
-    text: "La tarea se eliminará permanentemente.",
-    icon: 'question',
-    showCancelButton: true,
-    confirmButtonColor: '#d33',
-    cancelButtonColor: '#68B0AB',
-    confirmButtonText: 'Sí, eliminar',
-    cancelButtonText: 'Cancelar'
-  }).then((resultado) => {
-    if (resultado.isConfirmed) {
-      let tareas = obtenerTareas();
-      tareas = tareas.filter(tarea => tarea.id !== idTarea);
-      localStorage.setItem('lista_tareas', JSON.stringify(tareas));
-      renderizarTareas();
-      
-      Swal.fire({
-        icon: 'success',
-        title: '¡Eliminada!',
-        text: 'La tarea ha sido borrada con éxito.',
-        timer: 1500,
-        showConfirmButton: false
-      });
-    }
-  });
+function createTaskHtml(tarea) {
+  const nombreTarea = tarea.nombre || tarea.name;
+  const descripcionTarea = tarea.descripcion || tarea.description;
+  const fechaTarea = tarea.fecha || tarea.dueDate;
+  const categoriaTarea = tarea.categoria || 'Desarrollo';
+  const prioridadTarea = tarea.prioridad || 'Media';
+
+  let claseBorde = 'border-secondary';
+  let claseBadgePrioridad = 'bg-secondary';
+
+  if (prioridadTarea === 'Crítica') {
+    claseBorde = 'border-danger';
+    claseBadgePrioridad = 'bg-danger';
+  } else if (prioridadTarea === 'Alta') {
+    claseBorde = 'border-warning';
+    claseBadgePrioridad = 'bg-warning text-dark';
+  } else if (prioridadTarea === 'Media') {
+    claseBorde = 'border-info';
+    claseBadgePrioridad = 'bg-info text-dark';
+  }
+
+  let claseBadgeCategoria = 'bg-primary';
+  if (categoriaTarea === 'Estudio') claseBadgeCategoria = 'bg-success';
+  else if (categoriaTarea === 'Personal') claseBadgeCategoria = 'bg-secondary';
+
+  const estaCompletada = tarea.estado === 'Completada';
+  const estiloTarjeta = estaCompletada ? 'background-color: #f8f9fa; opacity: 0.85;' : '';
+  const estiloTextoNombre = estaCompletada ? 'text-decoration: line-through; color: #6c757d;' : '';
+  const textoBotonEstado = estaCompletada ? 'Marcar Pendiente' : 'Completar';
+  const claseBotonEstado = estaCompletada ? 'btn-outline-secondary' : 'btn-outline-success';
+  const etiquetaEstado = tarea.estado || tarea.status || 'PORHACER';
+  const badgeEstadoClase = estaCompletada ? 'bg-success' : 'bg-secondary';
+
+  return `
+    <div class="card mb-3 ${claseBorde} shadow-sm tarea-item" data-task-id="${tarea.id}" style="${estiloTarjeta}">
+      <div class="card-body" data-task-id="${tarea.id}">
+        <div class="d-flex justify-content-between align-items-start mb-2">
+          <h5 class="card-title m-0" style="${estiloTextoNombre}">${nombreTarea}</h5>
+          <div>
+            <span class="badge ${claseBadgeCategoria}">${categoriaTarea}</span>
+            <span class="badge ${claseBadgePrioridad}">${prioridadTarea}</span>
+          </div>
+        </div>
+        <p class="card-text text-muted small mb-2">${descripcionTarea}</p>
+        <div class="d-flex justify-content-between align-items-center" data-task-id="${tarea.id}">
+          <small class="fw-bold">Vence: ${fechaTarea}</small>
+          <div class="d-flex gap-2 align-items-center" data-task-id="${tarea.id}">
+            <span class="badge ${badgeEstadoClase}">Estado: ${etiquetaEstado}</span>
+            <button type="button" class="btn ${claseBotonEstado} btn-sm boton-estado" data-task-id="${tarea.id}">${textoBotonEstado}</button>
+            <button type="button" class="delete-button btn btn-danger btn-sm" data-task-id="${tarea.id}">Eliminar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
 }
 
-//Renderiza todas las tarjetas de tareas en el DOM en el espacio del otro comentario del html
 function renderizarTareas() {
   const contenedor = document.getElementById('contenedor-lista-tareas');
   contenedor.innerHTML = '';
-  const tareas = obtenerTareas();
+
+  const tareas = taskManager.tasks;
 
   if (tareas.length === 0) {
     contenedor.innerHTML = '<p class="text-center text-muted my-3">No hay tareas pendientes en este momento.</p>';
@@ -134,83 +123,93 @@ function renderizarTareas() {
   }
 
   tareas.forEach(tarea => {
-    let claseBorde = 'border-secondary';
-    let claseBadgePrioridad = 'bg-secondary';
-    
-    if (tarea.prioridad === 'Crítica') { 
-      claseBorde = 'border-danger'; 
-      claseBadgePrioridad = 'bg-danger'; 
-    } else if (tarea.prioridad === 'Alta') { 
-      claseBorde = 'border-warning'; 
-      claseBadgePrioridad = 'bg-warning text-dark'; 
-    } else if (tarea.prioridad === 'Media') { 
-      claseBorde = 'border-info'; 
-      claseBadgePrioridad = 'bg-info text-dark'; 
-    }
-
-    let claseBadgeCategoria = 'bg-primary';
-    if (tarea.categoria === 'Estudio') claseBadgeCategoria = 'bg-success';
-    else if (tarea.categoria === 'Personal') claseBadgeCategoria = 'bg-secondary';
-
-    const tarjeta = document.createElement('div');
-    tarjeta.className = `card mb-3 ${claseBorde} shadow-sm`;
-    tarjeta.innerHTML = `
-      <div class="card-body">
-        <div class="d-flex justify-content-between align-items-start mb-2">
-          <h5 class="card-title m-0">${tarea.nombre}</h5>
-          <div>
-            <span class="badge ${claseBadgeCategoria}">${tarea.categoria}</span>
-            <span class="badge ${claseBadgePrioridad}">${tarea.prioridad}</span>
-          </div>
-        </div>
-        <p class="card-text text-muted small mb-2">${tarea.descripcion}</p>
-        <div class="d-flex justify-content-between align-items-center">
-          <small class="fw-bold">Vence: ${tarea.fecha}</small>
-          <div>
-            <span class="badge bg-secondary me-2">Pendiente</span>
-            <button class="btn btn-outline-danger btn-sm" onclick="eliminarTarea('${tarea.id}')">Eliminar</button>
-          </div>
-        </div>
-      </div>
-    `;
-    contenedor.appendChild(tarjeta);
+    contenedor.innerHTML += createTaskHtml(tarea);
   });
 }
 
-// Maneja el evento de envío del formulario para agregar una nueva tarea
-document.getElementById('formulario-tarea').addEventListener('submit', function(evento) {
-  evento.preventDefault();
+const listaTareasContenedor = document.getElementById('contenedor-lista-tareas');
 
-  const nuevaTarea = {
-    id: Date.now().toString(), // Genera un ID unico basado en el tiempo
-    nombre: document.getElementById('campo-nombre').value,
-    descripcion: document.getElementById('campo-descripcion').value,
-    categoria: document.getElementById('selector-categoria').value,
-    prioridad: document.getElementById('selector-prioridad').value,
-    fecha: document.getElementById('campo-fecha').value
-  };
+listaTareasContenedor.addEventListener('click', function(event) {
+  const elementoTarjeta = event.target.closest('[data-task-id]');
+  const taskId = elementoTarjeta ? Number(elementoTarjeta.dataset.taskId) : null;
 
-  // Validar datos utilizando la función exigida por la guia
-  if (!validFormFieldInput(nuevaTarea)) {
-    return; // Detiene la ejecución si la validación falla
+  if (event.target.classList.contains('boton-estado') && taskId !== null) {
+    taskManager.alternarEstadoTarea(taskId);
+    renderizarTareas();
   }
 
-  const tareas = obtenerTareas();
-  tareas.unshift(nuevaTarea); // Inserta la nueva tarea al principio de la lista para eso el metodo unshift
-  localStorage.setItem('lista_tareas', JSON.stringify(tareas));
+  if (event.target.classList.contains('delete-button') && taskId !== null) {
+    Swal.fire({
+      title: '¿Estás seguro?',
+      text: 'La tarea se eliminará permanentemente',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#68B0AB',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar'
+    }).then((resultado) => {
+      if (resultado.isConfirmed) {
+        taskManager.deleteTask(taskId);
+        taskManager.save();
+        renderizarTareas();
 
+        Swal.fire({
+          icon: 'success',
+          title: 'Eliminada',
+          text: 'La tarea ha sido borrada con éxito',
+          timer: 1500,
+          showConfirmButton: false
+        });
+      }
+    });
+  }
+});
+
+const newTaskForm = document.querySelector('#formulario-tarea');
+
+newTaskForm.addEventListener('submit', function(event) {
+  event.preventDefault();
+
+  const name = document.querySelector('#campo-nombre').value;
+  const description = document.querySelector('#campo-descripcion').value;
+  const category = document.querySelector('#selector-categoria').value;
+  const priority = document.querySelector('#selector-prioridad').value;
+  const dueDate = document.querySelector('#campo-fecha').value;
+  const status = 'PORHACER';
+
+  const datosFormulario = {
+    nombre: name,
+    descripcion: description,
+    categoria: category,
+    prioridad: priority,
+    fecha: dueDate
+  };
+
+  if (!validFormFieldInput(datosFormulario)) {
+    return;
+  }
+
+  taskManager.addTask(name, description, dueDate, status);
+
+  const ultimaTarea = taskManager.tasks[taskManager.tasks.length - 1];
+  ultimaTarea.categoria = category;
+  ultimaTarea.prioridad = priority;
+
+  taskManager.save();
   renderizarTareas();
-  this.reset();
+  newTaskForm.reset();
 
-  // Alerta de success con SweetAlert
   Swal.fire({
     icon: 'success',
-    title: '¡Tarea registrada!',
-    text: 'La nueva tarea se ha guardado correctamente.',
+    title: 'Tarea registrada',
+    text: `Tarea #${ultimaTarea.id} agregada con estado ${ultimaTarea.status}.`,
     timer: 1800,
     showConfirmButton: false
   });
 });
 
-// Inicializar la aplicacion al cargar el documento por eso se pone en el body y no el head
-document.addEventListener('DOMContentLoaded', renderizarTareas);
+document.addEventListener('DOMContentLoaded', () => {
+  taskManager.cargarDesdeLocalStorage();
+  renderizarTareas();
+});
